@@ -11,8 +11,17 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
-type DeviceKind = "panel" | "switch" | "lamp" | "outlet" | "gfci";
-type WireColor = "black" | "white" | "green";
+type DeviceKind =
+  | "panel"
+  | "switch"
+  | "lamp"
+  | "outlet"
+  | "gfci"
+  | "threeWay"
+  | "comboSwitch"
+  | "fan"
+  | "smoke";
+type WireColor = "black" | "white" | "green" | "red";
 
 type Device = {
   id: string;
@@ -111,6 +120,49 @@ const DEVICE_CATALOG: Record<
       { id: "ground", label: "G", tone: "ground", x: 58, y: 90 },
     ],
   },
+  threeWay: {
+    name: "Three-way switch",
+    short: "3-WAY",
+    description: "Two-location control",
+    terminals: [
+      { id: "common", label: "COM", tone: "hot", x: 0, y: 44 },
+      { id: "traveler1", label: "T1", tone: "hot", x: 116, y: 26 },
+      { id: "traveler2", label: "T2", tone: "hot", x: 116, y: 62 },
+      { id: "ground", label: "G", tone: "ground", x: 58, y: 90 },
+    ],
+  },
+  comboSwitch: {
+    name: "Combination switch",
+    short: "COMBO",
+    description: "Two loads, one box",
+    terminals: [
+      { id: "line", label: "LINE", tone: "hot", x: 0, y: 44 },
+      { id: "lightLoad", label: "LIGHT", tone: "hot", x: 116, y: 26 },
+      { id: "fanLoad", label: "FAN", tone: "hot", x: 116, y: 62 },
+      { id: "ground", label: "G", tone: "ground", x: 58, y: 90 },
+    ],
+  },
+  fan: {
+    name: "Ceiling fan",
+    short: "FAN",
+    description: "Motor load",
+    terminals: [
+      { id: "hot", label: "HOT", tone: "hot", x: 0, y: 52 },
+      { id: "neutral", label: "N", tone: "neutral", x: 116, y: 52 },
+      { id: "ground", label: "G", tone: "ground", x: 58, y: 88 },
+    ],
+  },
+  smoke: {
+    name: "Smoke alarm",
+    short: "ALARM",
+    description: "Hardwired + interconnect",
+    terminals: [
+      { id: "hot", label: "HOT", tone: "hot", x: 0, y: 28 },
+      { id: "neutral", label: "N", tone: "neutral", x: 0, y: 62 },
+      { id: "interconnect", label: "INT", tone: "hot", x: 116, y: 44 },
+      { id: "ground", label: "G", tone: "ground", x: 58, y: 90 },
+    ],
+  },
 };
 
 const LESSONS: Lesson[] = [
@@ -200,12 +252,107 @@ const LESSONS: Lesson[] = [
       "Complete the equipment-grounding path and run the test.",
     ],
   },
+  {
+    id: "three-way-light",
+    number: "04",
+    title: "Control a light from two locations",
+    eyebrow: "Three-way switching",
+    time: "15 min",
+    difficulty: "Intermediate",
+    brief:
+      "Build a three-way lighting circuit using two traveler paths so one ceiling light can be controlled from either end of a hallway.",
+    devices: [
+      { id: "panel", kind: "panel", label: "15A PANEL", x: 42, y: 230 },
+      { id: "switch-a", kind: "threeWay", label: "3-WAY A", x: 255, y: 155 },
+      { id: "switch-b", kind: "threeWay", label: "3-WAY B", x: 505, y: 155 },
+      { id: "lamp", kind: "lamp", label: "HALL LIGHT", x: 740, y: 195 },
+    ],
+    expected: [
+      { from: "panel.hot", to: "switch-a.common", color: "black", note: "Panel hot → switch A common" },
+      { from: "switch-a.traveler1", to: "switch-b.traveler1", color: "black", note: "Connect traveler path 1" },
+      { from: "switch-a.traveler2", to: "switch-b.traveler2", color: "red", note: "Connect red traveler path 2" },
+      { from: "switch-b.common", to: "lamp.hot", color: "black", note: "Switch B common → light hot" },
+      { from: "panel.neutral", to: "lamp.neutral", color: "white", note: "Panel neutral → light neutral" },
+      { from: "panel.ground", to: "switch-a.ground", color: "green", note: "Bond switch A" },
+      { from: "switch-a.ground", to: "switch-b.ground", color: "green", note: "Bond switch B" },
+      { from: "switch-b.ground", to: "lamp.ground", color: "green", note: "Continue ground to light" },
+    ],
+    steps: [
+      "Bring line power to the common terminal on the first three-way switch.",
+      "Run separate black and red traveler conductors between the matching traveler terminals.",
+      "Connect the second switch common to the light's hot terminal.",
+      "Return neutral directly to the panel and complete the equipment-grounding path.",
+    ],
+  },
+  {
+    id: "fan-light-combo",
+    number: "05",
+    title: "Control a fan and light separately",
+    eyebrow: "Combination controls",
+    time: "14 min",
+    difficulty: "Intermediate",
+    brief:
+      "Use a combination switch to send independent switched conductors to a ceiling light and fan while sharing neutral and equipment ground.",
+    devices: [
+      { id: "panel", kind: "panel", label: "15A PANEL", x: 48, y: 230 },
+      { id: "combo", kind: "comboSwitch", label: "DUAL CONTROL", x: 300, y: 190 },
+      { id: "lamp", kind: "lamp", label: "FAN LIGHT", x: 590, y: 95 },
+      { id: "fan", kind: "fan", label: "CEILING FAN", x: 720, y: 325 },
+    ],
+    expected: [
+      { from: "panel.hot", to: "combo.line", color: "black", note: "Panel hot → combo LINE" },
+      { from: "combo.lightLoad", to: "lamp.hot", color: "black", note: "LIGHT output → light hot" },
+      { from: "combo.fanLoad", to: "fan.hot", color: "red", note: "Red FAN output → fan hot" },
+      { from: "panel.neutral", to: "lamp.neutral", color: "white", note: "Panel neutral → light neutral" },
+      { from: "lamp.neutral", to: "fan.neutral", color: "white", note: "Continue neutral to fan" },
+      { from: "panel.ground", to: "combo.ground", color: "green", note: "Bond the combo switch" },
+      { from: "combo.ground", to: "lamp.ground", color: "green", note: "Continue ground to light" },
+      { from: "lamp.ground", to: "fan.ground", color: "green", note: "Continue ground to fan" },
+    ],
+    steps: [
+      "Feed the combination switch LINE terminal from the panel hot.",
+      "Use separate black and red switched legs for the light and fan loads.",
+      "Carry the shared neutral to both ceiling loads.",
+      "Bond the switch, light, and fan along one continuous equipment-grounding path.",
+    ],
+  },
+  {
+    id: "smoke-interconnect",
+    number: "06",
+    title: "Interconnect two smoke alarms",
+    eyebrow: "Life-safety circuits",
+    time: "12 min",
+    difficulty: "Intermediate",
+    brief:
+      "Practice a simplified hardwired alarm circuit with continuous power, neutral, equipment ground, and a red interconnect signal between alarms.",
+    devices: [
+      { id: "panel", kind: "panel", label: "15A PANEL", x: 65, y: 225 },
+      { id: "alarm-a", kind: "smoke", label: "ALARM 1", x: 375, y: 165 },
+      { id: "alarm-b", kind: "smoke", label: "ALARM 2", x: 690, y: 165 },
+    ],
+    expected: [
+      { from: "panel.hot", to: "alarm-a.hot", color: "black", note: "Panel hot → alarm 1 hot" },
+      { from: "alarm-a.hot", to: "alarm-b.hot", color: "black", note: "Continue hot to alarm 2" },
+      { from: "panel.neutral", to: "alarm-a.neutral", color: "white", note: "Panel neutral → alarm 1" },
+      { from: "alarm-a.neutral", to: "alarm-b.neutral", color: "white", note: "Continue neutral to alarm 2" },
+      { from: "alarm-a.interconnect", to: "alarm-b.interconnect", color: "red", note: "Join red interconnect signal" },
+      { from: "panel.ground", to: "alarm-a.ground", color: "green", note: "Bond alarm box 1" },
+      { from: "alarm-a.ground", to: "alarm-b.ground", color: "green", note: "Continue equipment ground" },
+    ],
+    steps: [
+      "Provide unswitched hot and neutral to the first alarm.",
+      "Continue hot and neutral to the second alarm without using a wall switch.",
+      "Join the alarms with the red interconnect signal conductor.",
+      "Complete the equipment-grounding path before running the virtual test.",
+    ],
+  },
 ];
 
 const WIRE_NAMES: Record<WireColor, string> = {
   black: "Hot / switched hot",
   white: "Neutral",
   green: "Equipment ground",
+  red: "Traveler / second switched leg / interconnect",
 };
 
 function terminalKey(ref: TerminalRef) {
@@ -221,6 +368,29 @@ function DeviceGlyph({ kind, active = false }: { kind: DeviceKind; active?: bool
     <span className={`device-glyph device-glyph--${kind} ${active ? "is-active" : ""}`} aria-hidden="true">
       {kind === "lamp" ? <span className="lamp-rays">✦</span> : null}
       {kind === "switch" ? <span className="switch-toggle" /> : null}
+      {kind === "threeWay" ? (
+        <>
+          <span className="three-way-toggle" />
+          <span className="traveler-dot traveler-dot--a" />
+          <span className="traveler-dot traveler-dot--b" />
+        </>
+      ) : null}
+      {kind === "comboSwitch" ? (
+        <>
+          <span className="combo-toggle combo-toggle--a" />
+          <span className="combo-toggle combo-toggle--b" />
+        </>
+      ) : null}
+      {kind === "fan" ? (
+        <span className="fan-rotor">
+          <span className="fan-blade fan-blade--a" />
+          <span className="fan-blade fan-blade--b" />
+          <span className="fan-blade fan-blade--c" />
+        </span>
+      ) : null}
+      {kind === "smoke" ? (
+        <><span className="smoke-ring" /><span className="smoke-pip" /></>
+      ) : null}
       {kind === "outlet" || kind === "gfci" ? (
         <>
           <span className="slot slot-a" />
@@ -543,7 +713,7 @@ export function CircuitStudio() {
             <div className="tool-strip">
               <div className="wire-tools" aria-label="Wire color">
                 <span className="tool-label">WIRE</span>
-                {(["black", "white", "green"] as WireColor[]).map((color) => (
+                {(["black", "white", "green", "red"] as WireColor[]).map((color) => (
                   <button
                     key={color}
                     className={`wire-choice wire-choice--${color} ${wireColor === color ? "is-selected" : ""}`}
@@ -595,18 +765,18 @@ export function CircuitStudio() {
 
               {devices.map((device) => {
                 const definition = DEVICE_CATALOG[device.kind];
-                const lightActive = device.kind === "lamp" && powerOn && isComplete;
+                const deviceActive = ["lamp", "fan", "smoke"].includes(device.kind) && powerOn && isComplete;
                 return (
                   <article
                     key={device.id}
-                    className={`circuit-device circuit-device--${device.kind} ${lightActive ? "is-powered" : ""}`}
+                    className={`circuit-device circuit-device--${device.kind} ${deviceActive ? "is-powered" : ""}`}
                     style={{ "--x": `${(device.x / CANVAS_WIDTH) * 100}%`, "--y": `${(device.y / CANVAS_HEIGHT) * 100}%` } as CSSProperties}
                     onPointerDown={(event) => startDeviceDrag(event, device)}
                     aria-label={`${device.label}, draggable device`}
                   >
                     <div className="device-card">
                       <span className="device-kicker">{definition.short}</span>
-                      <DeviceGlyph kind={device.kind} active={lightActive} />
+                      <DeviceGlyph kind={device.kind} active={deviceActive} />
                       <strong>{device.label}</strong>
                       <small>{definition.description}</small>
                     </div>
