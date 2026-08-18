@@ -22,6 +22,12 @@ test("server-renders the Wirewise learning lab", async () => {
   assert.match(html, /<title>Wirewise Lab/);
   assert.match(html, /WIREWISE/);
   assert.match(html, /Switch a ceiling light/);
+  assert.match(html, /Control a light from two locations/);
+  assert.match(html, /Control a fan and light separately/);
+  assert.match(html, /Interconnect two smoke alarms/);
+  assert.match(html, /Three-way switch/);
+  assert.match(html, /Ceiling fan/);
+  assert.match(html, /Smoke alarm/);
   assert.match(html, /Interactive circuit workbench/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/);
 });
