@@ -346,6 +346,42 @@ const LESSONS: Lesson[] = [
       "Complete the equipment-grounding path before running the virtual test.",
     ],
   },
+  {
+    id: "three-way-two-lights",
+    number: "07",
+    title: "Control two lights from two locations",
+    eyebrow: "Multi-light three-way circuit",
+    time: "18 min",
+    difficulty: "Intermediate",
+    brief:
+      "Wire two three-way switches so both lights operate together from either location. Continue the switched hot, neutral, and equipment ground from the first light to the second.",
+    devices: [
+      { id: "panel", kind: "panel", label: "15A PANEL", x: 35, y: 230 },
+      { id: "switch-a", kind: "threeWay", label: "3-WAY A", x: 215, y: 135 },
+      { id: "switch-b", kind: "threeWay", label: "3-WAY B", x: 470, y: 135 },
+      { id: "light-a", kind: "lamp", label: "LIGHT 1", x: 650, y: 80 },
+      { id: "light-b", kind: "lamp", label: "LIGHT 2", x: 745, y: 320 },
+    ],
+    expected: [
+      { from: "panel.hot", to: "switch-a.common", color: "black", note: "Panel hot → switch A common" },
+      { from: "switch-a.traveler1", to: "switch-b.traveler1", color: "black", note: "Connect black traveler path 1" },
+      { from: "switch-a.traveler2", to: "switch-b.traveler2", color: "red", note: "Connect red traveler path 2" },
+      { from: "switch-b.common", to: "light-a.hot", color: "black", note: "Switch B common → light 1 hot" },
+      { from: "light-a.hot", to: "light-b.hot", color: "black", note: "Continue switched hot to light 2" },
+      { from: "panel.neutral", to: "light-a.neutral", color: "white", note: "Panel neutral → light 1 neutral" },
+      { from: "light-a.neutral", to: "light-b.neutral", color: "white", note: "Continue neutral to light 2" },
+      { from: "panel.ground", to: "switch-a.ground", color: "green", note: "Bond switch A" },
+      { from: "switch-a.ground", to: "switch-b.ground", color: "green", note: "Bond switch B" },
+      { from: "switch-b.ground", to: "light-a.ground", color: "green", note: "Continue ground to light 1" },
+      { from: "light-a.ground", to: "light-b.ground", color: "green", note: "Continue ground to light 2" },
+    ],
+    steps: [
+      "Bring line power to the common terminal on the first three-way switch.",
+      "Run separate black and red travelers between the matching traveler terminals.",
+      "Connect the second switch common to light 1, then continue the switched hot to light 2.",
+      "Continue neutral and equipment ground through both light fixtures before running the test.",
+    ],
+  },
 ];
 
 const WIRE_NAMES: Record<WireColor, string> = {

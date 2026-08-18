@@ -4,7 +4,7 @@ Wirewise Lab is a visual learning app for practicing residential electrical circ
 
 ## What is included
 
-- Six guided lessons covering switched lighting, receptacle branches, GFCI protection, three-way switching, fan/light controls, and interconnected smoke alarms
+- Seven guided lessons covering switched lighting, receptacle branches, GFCI protection, single- and two-light three-way switching, fan/light controls, and interconnected smoke alarms
 - Drag-and-drop device placement and repositioning
 - Drag-to-wire and click-to-wire terminal connections
 - Nine draggable device types with live conductor, terminal, and circuit-path validation

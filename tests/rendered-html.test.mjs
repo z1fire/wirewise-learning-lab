@@ -23,6 +23,7 @@ test("server-renders the Wirewise learning lab", async () => {
   assert.match(html, /WIREWISE/);
   assert.match(html, /Switch a ceiling light/);
   assert.match(html, /Control a light from two locations/);
+  assert.match(html, /Control two lights from two locations/);
   assert.match(html, /Control a fan and light separately/);
   assert.match(html, /Interconnect two smoke alarms/);
   assert.match(html, /Three-way switch/);
