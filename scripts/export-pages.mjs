@@ -12,8 +12,9 @@ function githubPagesUrl() {
 }
 
 const siteUrl = githubPagesUrl();
+const renderOrigin = new URL(siteUrl).origin;
 const response = await worker.fetch(
-  new Request(`${siteUrl}/`, {
+  new Request(`${renderOrigin}/`, {
     headers: {
       accept: "text/html",
       "x-wirewise-site-base": siteUrl,
